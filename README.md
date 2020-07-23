@@ -37,4 +37,4 @@ $form->pairWithEntity($entity);
 
 The result of this example would be something like this:
 
-![Example](https://imgur.com/468mQKF)
+![Example](https://i.imgur.com/468mQKF.png)
