@@ -14,15 +14,16 @@ namespace NpcDialog;
 
 
 use InvalidArgumentException;
+use pocketmine\entity\Entity;
 
 class DialogFormStore {
 
     /** @var DialogForm[] */
     static private $forms = [];
 
-    static public function getFormByEntityId(int $entityId): ?DialogForm {
+    static public function getFormByEntity(Entity $entity): ?DialogForm {
         foreach(self::$forms as $form) {
-            if($form->hasEntity() and $form->getEntity()->getId() === $entityId) {
+            if($form->getEntity() === $entity) {
                 return $form;
             }
         }

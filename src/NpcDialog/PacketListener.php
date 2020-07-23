@@ -26,7 +26,7 @@ class PacketListener implements Listener {
         $player = $event->getPlayer();
         $server = $player->getServer();
 
-        if(!($packet instanceof NpcRequestPacket) or $server->findEntity($packet->entityRuntimeId) === null) {
+        if(!($packet instanceof NpcRequestPacket) or ($entity = $server->findEntity($packet->entityRuntimeId)) === null) {
             return;
         }
 
@@ -35,18 +35,16 @@ class PacketListener implements Listener {
 
         switch($packet->requestType) {
             case NpcRequestPacket::REQUEST_EXECUTE_ACTION:
+                $logger->debug("Received a NpcRequestPacket action" . $packet->actionType);
                 $this->responsePool[$username] = $packet->actionType;
                 break;
             case NpcRequestPacket::REQUEST_EXECUTE_CLOSING_COMMANDS:
-                if(array_key_exists($username, $this->responsePool)) {
-                    $form = DialogFormStore::getFormByEntityId($packet->entityRuntimeId);
-                    if($form !== null) {
-                        $form->handleResponse($player, $this->responsePool[$username]);
-                    } else {
-                        $logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a registered form on the store");
-                    }
+                $form = DialogFormStore::getFormByEntity($entity);
+                if($form !== null) {
+                    $form->handleResponse($player, $this->responsePool[$username] ?? null);
+                    unset($this->responsePool[$username]);
                 } else {
-                    $logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a response stored");
+                    $logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a registered form on the store");
                 }
                 break;
         }
