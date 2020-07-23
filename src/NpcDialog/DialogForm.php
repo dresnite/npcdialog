@@ -95,7 +95,7 @@ class DialogForm {
         $propertyManager = $entity->getDataPropertyManager();
         $propertyManager->setByte(Entity::DATA_HAS_NPC_COMPONENT, 1);
         $propertyManager->setString(Entity::DATA_INTERACTIVE_TAG, $this->dialogText);
-        $propertyManager->setString(Entity::DATA_NPC_ACTIONS, json_encode($this->buttons, JSON_UNESCAPED_UNICODE));
+        $propertyManager->setString(Entity::DATA_NPC_ACTIONS, json_encode($this->buttons));
     }
 
     public function handleResponse(Player $player, $response): void {
