@@ -36,6 +36,8 @@ class DialogForm {
     public function __construct(string $dialogText) {
         $this->dialogText = $dialogText;
         DialogFormStore::registerForm($this);
+
+        $this->onCreation();
     }
 
     public function getDialogText(): string {
@@ -105,5 +107,7 @@ class DialogForm {
             throw new FormValidationException("Couldn't validate DialogForm with response $response");
         }
     }
+
+    protected function onCreation(): void {}
 
 }
