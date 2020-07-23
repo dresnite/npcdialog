@@ -71,6 +71,11 @@ class DialogForm implements JsonSerializable {
     public function handleResponse(Player $player, $response): void {
         // todo
         // response is probably the button index??? test
+        if($response === null) {
+            // executed when closed???
+        } elseif(is_int($response)) {
+            $this->buttons[$response]->executeSubmitListener($player); // todo test
+        }
     }
 
     public function jsonSerialize(): array {
