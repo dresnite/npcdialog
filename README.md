@@ -39,6 +39,6 @@ $form->setCloseListener(function(Player $player) {
 $form->pairWithEntity($entity);
 ```
 
-The result of this example would be something like this:
+The result of this example would be an entity showing this when it's right-clicked (or hold in the mobile versions):
 
 ![Example](https://i.imgur.com/468mQKF.png)
