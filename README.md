@@ -10,7 +10,7 @@ public function onEnable(): void {
 }
 ```
 
-Then you have to spawn or get the object of the entity you want to have the dialog (it can't be a player!). For this example, I will spawn a zombie using PocketMine built-in methods.
+Then you have to spawn or get the object of the entity you want to have the dialog form (it can't be a player!). For this example, I will spawn a zombie using PocketMine built-in methods.
 
  ```php
 $nbt = Entity::createBaseNBT($player, null, $player->yaw, $player->pitch);
