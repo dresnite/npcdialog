@@ -36,4 +36,12 @@ class DialogFormStore {
         self::$forms[] = $form;
     }
 
+    static public function unregisterForm(DialogForm $form): void {
+        if(in_array($form, self::$forms)) {
+            unset(self::$forms[array_search($form, self::$forms)]);
+        } else {
+            throw new InvalidArgumentException("Tried to unregister a dialog form that wasn't registered");
+        }
+    }
+
 }

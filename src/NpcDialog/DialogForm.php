@@ -73,6 +73,7 @@ class DialogForm implements JsonSerializable {
         // response is probably the button index??? test
         if($response === null) {
             // executed when closed???
+            DialogFormStore::unregisterForm($this);
         } elseif(is_int($response)) {
             $this->buttons[$response]->executeSubmitListener($player); // todo test
         }
