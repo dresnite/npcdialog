@@ -24,7 +24,7 @@ Finally you will have to create the form and pair it with the entity.
 ```php
 $form = new DialogForm("This is the dialog text");
  
-$form->addButton(new \NpcDialog\Button("Hi", function(Player $player) {
+$form->addButton(new Button("Hi", function(Player $player) {
     $player->sendMessage("Hi!!");
 }));
 
@@ -35,3 +35,6 @@ $form->setCloseListener(function(Player $player) {
 $form->pairWithEntity($entity);
 ```
 
+The result of this example would be something like this:
+
+![Example](https://imgur.com/468mQKF)
