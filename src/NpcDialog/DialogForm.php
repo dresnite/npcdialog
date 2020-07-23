@@ -84,6 +84,10 @@ class DialogForm {
             $this->entity->getDataPropertyManager()->setByte(Entity::DATA_HAS_NPC_COMPONENT, 0);
         }
 
+        if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null) {
+            DialogFormStore::unregisterForm($otherForm);
+        }
+
         $this->entity = $entity;
 
         $propertyManager = $entity->getDataPropertyManager();
