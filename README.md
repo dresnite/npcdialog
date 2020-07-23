@@ -1,5 +1,9 @@
 # NpcDialog
 
+### Download
+
+The compiled phar is available [on poggit](https://poggit.pmmp.io/ci/GiantQuartz/NpcDialog/NpcDialog)
+
 ### How to use 
 
 First, you have to register the virion, you can do this during the `onEnable()` of your plugin main class.
