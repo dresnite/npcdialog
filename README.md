@@ -34,7 +34,7 @@ $form->addButton(new Button("Hi", function(Player $player) {
 
 $form->setCloseListener(function(Player $player) {
     $player->sendMessage("You closed the form!");
-})
+});
 
 $form->pairWithEntity($entity);
 ```
