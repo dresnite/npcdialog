@@ -23,14 +23,14 @@ class PacketListener implements Listener {
 
     public function onPacketReceiveEvent(DataPacketReceiveEvent $event): void {
         $packet = $event->getPacket();
-		$server = Server::getInstance();
-		$player = $event->getOrigin()->getPlayer();
+        $server = Server::getInstance();
+        $player = $event->getOrigin()->getPlayer();
 
         if($player === null || !($packet instanceof NpcRequestPacket) || ($entity = $server->getWorldManager()->findEntity($packet->entityRuntimeId)) === null) {
             return;
         }
 
-		$username = $player->getName();
+        $username = $player->getName();
         $logger = $server->getLogger();
 
         switch($packet->requestType) {
