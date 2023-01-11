@@ -8,15 +8,14 @@
 
 declare(strict_types=1);
 
-
 namespace NpcDialog;
-
 
 use Closure;
 use InvalidArgumentException;
 use pocketmine\entity\Entity;
 use pocketmine\form\FormValidationException;
-use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 
 class DialogForm {
@@ -48,7 +47,7 @@ class DialogForm {
         $this->dialogText = $dialogText;
 
         if($this->entity !== null) {
-            $this->entity->getDataPropertyManager()->setString(Entity::DATA_INTERACTIVE_TAG, $this->dialogText);
+            $this->entity->getNetworkProperties()->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
         }
     }
 
@@ -83,7 +82,7 @@ class DialogForm {
         }
 
         if($this->entity !== null) {
-            $this->entity->getDataPropertyManager()->setByte(Entity::DATA_HAS_NPC_COMPONENT, 0);
+            $this->entity->getNetworkProperties()->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 0);
         }
 
         if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null) {
@@ -92,10 +91,10 @@ class DialogForm {
 
         $this->entity = $entity;
 
-        $propertyManager = $entity->getDataPropertyManager();
-        $propertyManager->setByte(Entity::DATA_HAS_NPC_COMPONENT, 1);
-        $propertyManager->setString(Entity::DATA_INTERACTIVE_TAG, $this->dialogText);
-        $propertyManager->setString(Entity::DATA_NPC_ACTIONS, json_encode($this->buttons));
+        $propertyManager = $entity->getNetworkProperties();
+        $propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
+        $propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
+        $propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));
     }
 
     public function handleResponse(Player $player, $response): void {

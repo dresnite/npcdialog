@@ -8,13 +8,11 @@
 
 declare(strict_types=1);
 
-
 namespace NpcDialog;
-
 
 use Closure;
 use JsonSerializable;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 
 class Button implements JsonSerializable {

@@ -11,10 +11,10 @@ declare(strict_types=1);
 
 namespace NpcDialog;
 
-
 use pocketmine\event\Listener;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\NpcRequestPacket;
+use pocketmine\Server;
 
 class PacketListener implements Listener {
 
@@ -23,10 +23,10 @@ class PacketListener implements Listener {
 
     public function onPacketReceiveEvent(DataPacketReceiveEvent $event): void {
         $packet = $event->getPacket();
-        $player = $event->getPlayer();
-        $server = $player->getServer();
+        $server = Server::getInstance();
+        $player = $event->getOrigin()->getPlayer();
 
-        if(!($packet instanceof NpcRequestPacket) or ($entity = $server->findEntity($packet->entityRuntimeId)) === null) {
+        if($player === null || !($packet instanceof NpcRequestPacket) || ($entity = $server->getWorldManager()->findEntity($packet->entityRuntimeId)) === null) {
             return;
         }
 
