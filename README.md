@@ -30,15 +30,21 @@ Finally you will have to create the form and pair it with the entity.
 ```php
 $form = new DialogForm("This is the dialog text");
  
-$form->addButton(new Button("Hi", function(Player $player) {
+$form->addButton("Hi", function(Player $player) {
     $player->sendMessage("Hi!!");
-}));
+});
 
 $form->setCloseListener(function(Player $player) {
     $player->sendMessage("You closed the form!");
 });
 
 $form->pairWithEntity($entity);
+```
+
+This can be trimmed down to a single line:
+
+```php
+(new DialogForm("This is the dialog text", function(Player $player){ $player->sendMessage("You closed the form!"); }))->addButton("Hi", function(Player $player){ $player->sendMessage("Hi!!"); })->pairWithEntity($entity);
 ```
 
 The result of this example would be an entity showing this when it's right-clicked (or hold in the mobile versions):
