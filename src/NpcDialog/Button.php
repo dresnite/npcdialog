@@ -43,20 +43,24 @@ class Button implements JsonSerializable{
 		return $this->name;
 	}
 
-	public function setName(string $name) : void{
+	/** @return $this */
+	public function setName(string $name) : self{
 		$this->name = $name;
+		return $this;
 	}
 
 	public function getSubmitListener() : ?Closure{
 		return $this->submitListener;
 	}
 
-	public function setSubmitListener(?Closure $submitListener) : void{
+	/** @return $this */
+	public function setSubmitListener(?Closure $submitListener) : self{
 		if($submitListener !== null){
 			Utils::validateCallableSignature(function(Player $player){ }, $submitListener);
 		}
 
 		$this->submitListener = $submitListener;
+		return $this;
 	}
 
 	public function executeSubmitListener(Player $player) : void{
