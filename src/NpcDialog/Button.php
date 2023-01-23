@@ -17,8 +17,6 @@ use pocketmine\utils\Utils;
 
 class Button implements JsonSerializable{
 
-	private string $text; //???
-
 	private string $data = "";
 
 	private int $mode = self::MODE_BUTTON;
@@ -35,7 +33,7 @@ class Button implements JsonSerializable{
 
 	private ?Closure $submitListener;
 
-	public function __construct(private string $name, ?Closure $submitListener = null){
+	public function __construct(private string $name, private string $text = "", ?Closure $submitListener = null){
 		$this->setSubmitListener($submitListener);
 	}
 
@@ -46,6 +44,14 @@ class Button implements JsonSerializable{
 	/** @return $this */
 	public function setName(string $name) : self{
 		$this->name = $name;
+		return $this;
+	}
+
+	public function getText() : string{ return $this->text; }
+
+	/** @return $this */
+	public function setText(string $text) : self{
+		$this->text = $text;
 		return $this;
 	}
 
@@ -72,7 +78,7 @@ class Button implements JsonSerializable{
 	public function jsonSerialize() : array{
 		return [
 			"button_name" => $this->name,
-			"text" => $this->text ?? "",
+			"text" => $this->text,
 			"data" => $this->data,
 			"mode" => $this->mode,
 			"type" => $this->type

@@ -55,8 +55,8 @@ class DialogForm{
 	}
 
 	/** @return $this */
-	public function addButton(string $name, ?Closure $submitListener = null) : self{
-		$this->buttons[] = new Button($name, $submitListener);
+	public function addButton(string $name, string $text = "", ?Closure $submitListener = null) : self{
+		$this->buttons[] = new Button($name, $text, $submitListener);
 		return $this;
 	}
 
