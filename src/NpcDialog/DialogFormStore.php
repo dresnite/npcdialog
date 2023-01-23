@@ -15,34 +15,35 @@ namespace NpcDialog;
 
 use InvalidArgumentException;
 use pocketmine\entity\Entity;
+use function array_key_exists;
 
-class DialogFormStore {
+class DialogFormStore{
 
-    /** @var DialogForm[] */
-    static private $forms = [];
+	/** @var DialogForm[] */
+	static private array $forms = [];
 
-    static public function getFormByEntity(Entity $entity): ?DialogForm {
-        foreach(self::$forms as $form) {
-            if($form->getEntity() === $entity) {
-                return $form;
-            }
-        }
-        return null;
-    }
+	static public function getFormByEntity(Entity $entity) : ?DialogForm{
+		foreach(self::$forms as $form){
+			if($form->getEntity() === $entity){
+				return $form;
+			}
+		}
+		return null;
+	}
 
-    static public function registerForm(DialogForm $form): void {
-        if(in_array($form, self::$forms)) {
-            throw new InvalidArgumentException("Trying to overwrite an already registered npc form");
-        }
-        self::$forms[] = $form;
-    }
+	static public function registerForm(DialogForm $form) : void{
+		if(in_array($form, self::$forms)){
+			throw new InvalidArgumentException("Trying to overwrite an already registered npc form");
+		}
+		self::$forms[$form->getId()] = $form;
+	}
 
-    static public function unregisterForm(DialogForm $form): void {
-        if(($key = array_search($form, self::$forms)) !== false) {
-            unset(self::$forms[$key]);
-        } else {
-            throw new InvalidArgumentException("Tried to unregister a dialog form that wasn't registered");
-        }
-    }
+	static public function unregisterForm(DialogForm $form) : void{
+		if(array_key_exists($form->getId(), self::$forms)){
+			unset(self::$forms[$form->getId()]);
+		}else{
+			throw new InvalidArgumentException("Tried to unregister a dialog form that wasn't registered");
+		}
+	}
 
 }

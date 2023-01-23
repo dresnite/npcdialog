@@ -4,7 +4,7 @@
 
 The compiled phar is available [on poggit](https://poggit.pmmp.io/ci/GiantQuartz/NpcDialog/NpcDialog)
 
-### How to use 
+### How to use
 
 First, you have to register the virion, you can do this during the `onEnable()` of your plugin main class.
 
@@ -14,7 +14,8 @@ public function onEnable(): void {
 }
 ```
 
-Then you have to spawn or get the object of the entity you want to have the dialog form (it can't be a player!). For this example, I will spawn a zombie using PocketMine built-in methods.
+Then you have to spawn or get the object of the entity you want to have the dialog form (it can't be a player!). For
+this example, I will spawn a zombie using PocketMine built-in methods.
 
  ```php
 $nbt = Entity::createBaseNBT($player, null, $player->yaw, $player->pitch);
@@ -25,6 +26,7 @@ $entity->setNameTag("Jerry The Zombie!");
  ```
 
 Finally you will have to create the form and pair it with the entity.
+
 ```php
 $form = new DialogForm("This is the dialog text");
  

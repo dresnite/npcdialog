@@ -1,5 +1,6 @@
 name: libNpcDialog
 author: GiantQuartz
 api: 4.0.0
+php: 8.0
 version: 1.0.0
 antigen: NpcDialog
