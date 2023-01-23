@@ -33,7 +33,8 @@ class DialogForm{
 
 	private ?Closure $closeListener = null;
 
-	public function __construct(private string $dialogText){
+	public function __construct(private string $dialogText, ?Closure $closeListener = null){
+		$this->setCloseListener($closeListener);
 		DialogFormStore::registerForm($this);
 
 		$this->onCreation();
@@ -45,14 +46,18 @@ class DialogForm{
 		return $this->dialogText;
 	}
 
-	public function setDialogText(string $dialogText) : void{
+	/** @return $this */
+	public function setDialogText(string $dialogText) : self{
 		$this->dialogText = $dialogText;
 
 		$this->entity?->getNetworkProperties()->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
+		return $this;
 	}
 
-	public function addButton(Button $button) : void{
-		$this->buttons[] = $button;
+	/** @return $this */
+	public function addButton(string $name, ?Closure $submitListener = null) : self{
+		$this->buttons[] = new Button($name, $submitListener);
+		return $this;
 	}
 
 	public function getEntity() : ?Entity{
@@ -63,11 +68,14 @@ class DialogForm{
 		return $this->closeListener;
 	}
 
-	public function setCloseListener(?Closure $closeListener) : void{
+	/** @return $this */
+	public function setCloseListener(?Closure $closeListener) : self{
 		if($closeListener !== null){
 			Utils::validateCallableSignature(function(Player $player){ }, $closeListener);
 		}
 		$this->closeListener = $closeListener;
+
+		return $this;
 	}
 
 	public function executeCloseListener(Player $player) : void{
@@ -76,7 +84,8 @@ class DialogForm{
 		}
 	}
 
-	public function pairWithEntity(Entity $entity) : void{
+	/** @return $this */
+	public function pairWithEntity(Entity $entity) : self{
 		if($entity instanceof Player){
 			throw new InvalidArgumentException("NpcForms can't be paired with players.");
 		}
@@ -93,6 +102,8 @@ class DialogForm{
 		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
 		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
 		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));
+
+		return $this;
 	}
 
 	public function handleResponse(Player $player, $response) : void{
