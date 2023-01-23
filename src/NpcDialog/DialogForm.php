@@ -19,6 +19,7 @@ use pocketmine\form\FormValidationException;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
+use Ramsey\Uuid\Uuid;
 
 class DialogForm{
 	use MarshalTrait;
@@ -27,13 +28,15 @@ class DialogForm{
 	private string $id;
 
 	/** @var Button[] */
+	#[Field]
 	private array $buttons = [];
 
 	private ?Entity $entity = null;
 
 	private ?Closure $closeListener = null;
 
-	public function __construct(private string $dialogText, ?Closure $closeListener = null){
+	public function __construct(private string $dialogText, ?Closure $closeListener = null, ?string $id = null){
+		$this->id = $id ?? Uuid::uuid4()->toString();
 		$this->setCloseListener($closeListener);
 		DialogFormStore::registerForm($this);
 
@@ -101,7 +104,7 @@ class DialogForm{
 		$propertyManager = $entity->getNetworkProperties();
 		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
 		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));
+		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));//todo libMarshal
 
 		return $this;
 	}

@@ -33,6 +33,8 @@ class PacketListener implements Listener{
 		$username = $player->getName();
 		$logger = $server->getLogger();
 
+		$logger->debug("Received NpcRequestPacket from $username");
+
 		switch($packet->requestType){
 			case NpcRequestPacket::REQUEST_EXECUTE_ACTION:
 				$logger->debug("Received a NpcRequestPacket action" . $packet->actionIndex);

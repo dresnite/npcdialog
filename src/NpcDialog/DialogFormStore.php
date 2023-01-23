@@ -32,7 +32,7 @@ class DialogFormStore{
 	}
 
 	static public function registerForm(DialogForm $form) : void{
-		if(in_array($form, self::$forms)){
+		if(array_key_exists($form->getId(), self::$forms)){
 			throw new InvalidArgumentException("Trying to overwrite an already registered npc form");
 		}
 		self::$forms[$form->getId()] = $form;
