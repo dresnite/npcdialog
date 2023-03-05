@@ -19,9 +19,6 @@ use pocketmine\Server;
 
 class PacketListener implements Listener{
 
-	/** @var array<string, int> */
-	private array $responsePool = [];
-
 	public function onPacketReceiveEvent(DataPacketReceiveEvent $event) : void{
 		$packet = $event->getPacket();
 		if($packet instanceof NpcRequestPacket){
@@ -46,13 +43,26 @@ class PacketListener implements Listener{
 			switch($packet->requestType){
 				case NpcRequestPacket::REQUEST_EXECUTE_ACTION:
 					$logger->debug("Received a NpcRequestPacket action " . $packet->actionIndex);
-					$this->responsePool[$username] = $packet->actionIndex;
+					$form = DialogFormStore::getFormByEntity($entity);
+					if($form !== null){
+						$form->executeButtonSubmitListener($player, $packet->actionIndex);
+					}else{
+						$logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a registered form on the store");
+					}
+					break;
+				case NpcRequestPacket::REQUEST_EXECUTE_OPENING_COMMANDS:
+					$logger->debug("Received a NpcRequestPacket action " . $packet->actionIndex);
+					$form = DialogFormStore::getFormByEntity($entity);
+					if($form !== null){
+						$form->executeOpenListener($player);
+					}else{
+						$logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a registered form on the store");
+					}
 					break;
 				case NpcRequestPacket::REQUEST_EXECUTE_CLOSING_COMMANDS:
 					$form = DialogFormStore::getFormByEntity($entity);
 					if($form !== null){
-						$form->handleResponse($player, $this->responsePool[$username] ?? null);
-						unset($this->responsePool[$username]);
+						$form->executeCloseListener($player);
 					}else{
 						$logger->warning("Unhandled NpcRequestPacket for $username because there wasn't a registered form on the store");
 					}

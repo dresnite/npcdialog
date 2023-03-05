@@ -21,6 +21,7 @@ use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 use Ramsey\Uuid\Uuid;
+use function array_key_exists;
 use function json_encode;
 
 class DialogForm{
@@ -36,9 +37,11 @@ class DialogForm{
 	private ?Entity $entity = null;
 
 	private ?Closure $closeListener = null;
+	private ?Closure $openListener = null;
 
-	public function __construct(private string $dialogText, ?Closure $closeListener = null, ?string $id = null){
+	public function __construct(private string $dialogText, ?Closure $openListener = null, ?Closure $closeListener = null, ?string $id = null){
 		$this->id = $id ?? Uuid::uuid4()->toString();
+		$this->setOpenListener($openListener);
 		$this->setCloseListener($closeListener);
 		DialogFormStore::registerForm($this);
 
@@ -93,6 +96,35 @@ class DialogForm{
 		}
 	}
 
+	public function getOpenListener() : ?Closure{
+		return $this->openListener;
+	}
+
+	public function setOpenListener(?Closure $openListener) : self{
+		if($openListener !== null){
+			Utils::validateCallableSignature(function(Player $player){ }, $openListener);
+		}
+		$this->openListener = $openListener;
+
+		return $this;
+	}
+
+	public function executeOpenListener(Player $player) : void{
+		if($this->openListener !== null){
+			($this->openListener)($player);
+		}
+	}
+
+	public function executeButtonSubmitListener(Player $player, int $button) : void{
+		if(array_key_exists($button, $this->buttons)){
+			$this->buttons[$button]->executeSubmitListener($player);
+			//close form after submit otherwise the player is stuck in the form
+			$this->close($player);
+		}else{
+			throw new FormValidationException("Couldn't validate DialogForm with response $button: button doesn't exist.");
+		}
+	}
+
 	/** @return $this */
 	public function pairWithEntity(Entity $entity) : self{
 		if($entity instanceof Player){
@@ -113,18 +145,6 @@ class DialogForm{
 		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());//todo libMarshal
 
 		return $this;
-	}
-
-	public function handleResponse(Player $player, $response) : void{
-		if($response === null){
-			$this->executeCloseListener($player);
-		}elseif(is_int($response) and array_key_exists($response, $this->buttons)){
-			$this->buttons[$response]->executeSubmitListener($player);
-			//close form after submit otherwise the player is stuck in the form
-			$this->close($player);
-		}else{
-			throw new FormValidationException("Couldn't validate DialogForm with response $response");
-		}
 	}
 
 	protected function onCreation() : void{ }
