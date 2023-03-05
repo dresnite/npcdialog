@@ -16,6 +16,7 @@ use libMarshal\attributes\Field;
 use libMarshal\MarshalTrait;
 use pocketmine\entity\Entity;
 use pocketmine\form\FormValidationException;
+use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
@@ -119,6 +120,9 @@ class DialogForm{
 			$this->executeCloseListener($player);
 		}elseif(is_int($response) and array_key_exists($response, $this->buttons)){
 			$this->buttons[$response]->executeSubmitListener($player);
+			//close form after submit otherwise the player is stuck in the form
+			$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, "", "", "", "");
+			$player->getNetworkSession()->sendDataPacket($pk);
 		}else{
 			throw new FormValidationException("Couldn't validate DialogForm with response $response");
 		}
