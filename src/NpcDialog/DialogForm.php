@@ -20,6 +20,7 @@ use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
 use Ramsey\Uuid\Uuid;
+use function json_encode;
 
 class DialogForm{
 	use MarshalTrait;
@@ -58,9 +59,13 @@ class DialogForm{
 	}
 
 	/** @return $this */
-	public function addButton(string $name, string $text = "", ?Closure $submitListener = null) : self{
+	public function addButton(string $name = "", string $text = "", ?Closure $submitListener = null) : self{
 		$this->buttons[] = new Button($name, $text, $submitListener);
 		return $this;
+	}
+
+	public function getActions() : string{//aka the buttons
+		return json_encode($this->buttons);
 	}
 
 	public function getEntity() : ?Entity{
@@ -104,7 +109,7 @@ class DialogForm{
 		$propertyManager = $entity->getNetworkProperties();
 		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
 		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));//todo libMarshal
+		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());//todo libMarshal
 
 		return $this;
 	}

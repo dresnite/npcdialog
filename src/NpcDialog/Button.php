@@ -17,7 +17,7 @@ use pocketmine\utils\Utils;
 
 class Button implements JsonSerializable{
 
-	private string $data = "";
+	private ?string $data = null;
 
 	private int $mode = self::MODE_BUTTON;
 
@@ -33,7 +33,7 @@ class Button implements JsonSerializable{
 
 	private ?Closure $submitListener;
 
-	public function __construct(private string $name, private string $text = "", ?Closure $submitListener = null){
+	public function __construct(private string $name = "", private string $command = "", ?Closure $submitListener = null){
 		$this->setSubmitListener($submitListener);
 	}
 
@@ -47,11 +47,27 @@ class Button implements JsonSerializable{
 		return $this;
 	}
 
-	public function getText() : string{ return $this->text; }
+	public function getCommand() : string{ return $this->command; }
 
 	/** @return $this */
-	public function setText(string $text) : self{
-		$this->text = $text;
+	public function setCommand(string $command) : self{
+		$this->command = $command;
+		return $this;
+	}
+
+	public function getMode() : int{ return $this->mode; }
+
+	/** @return $this */
+	public function setMode(int $mode = self::MODE_BUTTON) : self{
+		$this->mode = $mode;
+		return $this;
+	}
+
+	public function getType() : int{ return $this->type; }
+
+	/** @return $this */
+	public function setType(int $type = self::TYPE_COMMAND) : self{
+		$this->type = $type;
 		return $this;
 	}
 
@@ -77,11 +93,11 @@ class Button implements JsonSerializable{
 
 	public function jsonSerialize() : array{
 		return [
-			"button_name" => $this->name,
-			"text" => $this->text,
-			"data" => $this->data,
-			"mode" => $this->mode,
-			"type" => $this->type
+			"button_name" => $this->name,//the name of the button is only set if mode is 0 (button)
+			"data" => $this->data,//the data of the button appears to be null????
+			"mode" => $this->mode,//0 = button, 1 = on close, 2 = on open
+			"text" => $this->command,//the text in the command field
+			"type" => $this->type//always 1 (command) when not education edition
 		];
 	}
 }

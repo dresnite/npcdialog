@@ -42,6 +42,7 @@ class PacketListener implements Listener{
 			$logger = $server->getLogger();
 
 			$logger->debug("Received NpcRequestPacket from $username");
+			$logger->debug("NpcRequestPacket request type: " . $packet->requestType . " action index: " . $packet->actionIndex . " command: " . $packet->commandString . " runtime id: " . $packet->actorRuntimeId . " scene name: " . $packet->sceneName);
 
 			switch($packet->requestType){
 				case NpcRequestPacket::REQUEST_EXECUTE_ACTION:
@@ -60,7 +61,6 @@ class PacketListener implements Listener{
 				default:
 				{
 					$logger->warning("Unhandled NpcRequestPacket for $username because the request type was unknown");
-					$logger->debug("NpcRequestPacket request type: " . $packet->requestType . " action index: " . $packet->actionIndex . " command: " . $packet->commandString . " runtime id: " . $packet->actorRuntimeId . " scene name: " . $packet->sceneName);
 				}
 			}
 			$event->cancel();
@@ -73,8 +73,12 @@ class PacketListener implements Listener{
 		$server = Server::getInstance();
 		$logger = $server->getLogger();
 		$username = $player->getName();
-		$logger->debug("Received PlayerEntityInteractEvent from $username");
-		$pk = NpcDialoguePacket::create($entity->getId(), NpcDialoguePacket::ACTION_OPEN, "hello world", "", $entity->getNameTag(), "");
+		$form = DialogFormStore::getFormByEntity($entity);
+		if($form === null){
+			return;
+		}
+		$logger->debug("Received PlayerEntityInteractEvent from $username for entity " . $entity->getNameTag() . " with id " . $entity->getId() . " that has a registered form");
+		$pk = NpcDialoguePacket::create($entity->getId(), NpcDialoguePacket::ACTION_OPEN, $form->getDialogText(), $entity->getNameTag(), $entity->getNameTag(), $form->getActions());
 		$player->getNetworkSession()->sendDataPacket($pk);
 	}
 
