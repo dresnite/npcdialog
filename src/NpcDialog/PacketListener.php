@@ -14,7 +14,6 @@ namespace NpcDialog;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerEntityInteractEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\NpcRequestPacket;
 use pocketmine\Server;
 
@@ -63,7 +62,6 @@ class PacketListener implements Listener{
 					$logger->warning("Unhandled NpcRequestPacket for $username because the request type was unknown");
 				}
 			}
-			$event->cancel();
 		}
 	}
 
@@ -78,8 +76,7 @@ class PacketListener implements Listener{
 			return;
 		}
 		$logger->debug("Received PlayerEntityInteractEvent from $username for entity " . $entity->getNameTag() . " with id " . $entity->getId() . " that has a registered form");
-		$pk = NpcDialoguePacket::create($entity->getId(), NpcDialoguePacket::ACTION_OPEN, $form->getDialogText(), $entity->getNameTag(), $entity->getNameTag(), $form->getActions());
-		$player->getNetworkSession()->sendDataPacket($pk);
+		$form->open($player);
 	}
 
 }

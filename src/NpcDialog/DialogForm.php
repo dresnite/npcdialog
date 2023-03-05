@@ -60,8 +60,8 @@ class DialogForm{
 	}
 
 	/** @return $this */
-	public function addButton(string $name = "", string $text = "", ?Closure $submitListener = null) : self{
-		$this->buttons[] = new Button($name, $text, $submitListener);
+	public function addButton(string $name = "", string $command = "", ?Closure $submitListener = null) : self{
+		$this->buttons[] = new Button($name, $command, $submitListener);
 		return $this;
 	}
 
@@ -121,8 +121,7 @@ class DialogForm{
 		}elseif(is_int($response) and array_key_exists($response, $this->buttons)){
 			$this->buttons[$response]->executeSubmitListener($player);
 			//close form after submit otherwise the player is stuck in the form
-			$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, "", "", "", "");
-			$player->getNetworkSession()->sendDataPacket($pk);
+			$this->close($player);
 		}else{
 			throw new FormValidationException("Couldn't validate DialogForm with response $response");
 		}
@@ -130,4 +129,13 @@ class DialogForm{
 
 	protected function onCreation() : void{ }
 
+	public function open(Player $player) : void{
+		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+		$player->getNetworkSession()->sendDataPacket($pk);
+	}
+
+	public function close(Player $player) : void{
+		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+		$player->getNetworkSession()->sendDataPacket($pk);
+	}
 }
