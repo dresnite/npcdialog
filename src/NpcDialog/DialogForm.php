@@ -12,8 +12,6 @@ namespace NpcDialog;
 
 use Closure;
 use InvalidArgumentException;
-use libMarshal\attributes\Field;
-use libMarshal\MarshalTrait;
 use pocketmine\entity\Entity;
 use pocketmine\form\FormValidationException;
 use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
@@ -25,13 +23,9 @@ use function array_key_exists;
 use function json_encode;
 
 class DialogForm{
-	use MarshalTrait;
-
-	#[Field]
 	private string $id;
 
 	/** @var Button[] */
-	#[Field]
 	private array $buttons = [];
 
 	private ?Entity $entity = null;
