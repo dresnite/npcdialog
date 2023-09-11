@@ -8,22 +8,19 @@
 
 declare(strict_types=1);
 
-
 namespace NpcDialog;
-
 
 use pocketmine\plugin\Plugin;
 
-class NpcDialog {
+class NpcDialog{
 
-    /** @var bool */
-    static private $registered = false;
+	static private bool $registered = false;
 
-    static public function register(Plugin $plugin): void {
-        if(!self::$registered) {
-            $plugin->getServer()->getPluginManager()->registerEvents(new PacketListener(), $plugin);
-            self::$registered = true;
-        }
-    }
+	static public function register(Plugin $plugin) : void{
+		if(!self::$registered){
+			$plugin->getServer()->getPluginManager()->registerEvents(new PacketListener(), $plugin);
+			self::$registered = true;
+		}
+	}
 
 }

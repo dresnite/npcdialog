@@ -14,99 +14,142 @@ use Closure;
 use InvalidArgumentException;
 use pocketmine\entity\Entity;
 use pocketmine\form\FormValidationException;
+use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\utils\Utils;
+use Ramsey\Uuid\Uuid;
+use function array_key_exists;
+use function json_encode;
 
-class DialogForm {
+class DialogForm{
+	private string $id;
 
-    /** @var string */
-    private $dialogText;
+	/** @var Button[] */
+	private array $buttons = [];
 
-    /** @var Button[] */
-    private $buttons = [];
+	private ?Entity $entity = null;
 
-    /** @var Entity|null */
-    private $entity = null;
+	private ?Closure $closeListener = null;
+	private ?Closure $openListener = null;
 
-    /** @var Closure|null */
-    private $closeListener = null;
+	public function __construct(private string $dialogText, ?Closure $openListener = null, ?Closure $closeListener = null, ?string $id = null){
+		$this->id = $id ?? Uuid::uuid4()->toString();
+		$this->setOpenListener($openListener);
+		$this->setCloseListener($closeListener);
+		DialogFormStore::registerForm($this);
 
-    public function __construct(string $dialogText) {
-        $this->dialogText = $dialogText;
-        DialogFormStore::registerForm($this);
+		$this->onCreation();
+	}
 
-        $this->onCreation();
-    }
+	public function getId() : string{ return $this->id; }
 
-    public function getDialogText(): string {
-        return $this->dialogText;
-    }
+	public function getDialogText() : string{
+		return $this->dialogText;
+	}
 
-    public function setDialogText(string $dialogText): void {
-        $this->dialogText = $dialogText;
+	/** @return $this */
+	public function setDialogText(string $dialogText) : self{
+		$this->dialogText = $dialogText;
 
-        if($this->entity !== null) {
-            $this->entity->getNetworkProperties()->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-        }
-    }
+		$this->entity?->getNetworkProperties()->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
+		return $this;
+	}
 
-    public function addButton(Button $button): void {
-        $this->buttons[] = $button;
-    }
+	/** @return $this */
+	public function addButton(string $name = "", string $command = "", ?Closure $submitListener = null) : self{
+		$this->buttons[] = new Button($name, $command, $submitListener);
+		return $this;
+	}
 
-    public function getEntity(): ?Entity {
-        return $this->entity;
-    }
+	public function getActions() : string{//aka the buttons
+		return json_encode($this->buttons);
+	}
 
-    public function getCloseListener(): ?Closure {
-        return $this->closeListener;
-    }
+	public function getEntity() : ?Entity{
+		return $this->entity;
+	}
 
-    public function setCloseListener(?Closure $closeListener): void {
-        if($closeListener !== null) {
-            Utils::validateCallableSignature(function(Player $player) {}, $closeListener);
-        }
-        $this->closeListener = $closeListener;
-    }
+	public function getCloseListener() : ?Closure{
+		return $this->closeListener;
+	}
 
-    public function executeCloseListener(Player $player): void {
-        if($this->closeListener !== null) {
-            ($this->closeListener)($player);
-        }
-    }
+	/** @return $this */
+	public function setCloseListener(?Closure $closeListener) : self{
+		if($closeListener !== null){
+			Utils::validateCallableSignature(function(Player $player){ }, $closeListener);
+		}
+		$this->closeListener = $closeListener;
 
-    public function pairWithEntity(Entity $entity): void {
-        if($entity instanceof Player) {
-            throw new InvalidArgumentException("NpcForms can't be paired with players.");
-        }
+		return $this;
+	}
 
-        if($this->entity !== null) {
-            $this->entity->getNetworkProperties()->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 0);
-        }
+	public function executeCloseListener(Player $player) : void{
+		if($this->closeListener !== null){
+			($this->closeListener)($player);
+		}
+	}
 
-        if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null) {
-            DialogFormStore::unregisterForm($otherForm);
-        }
+	public function getOpenListener() : ?Closure{
+		return $this->openListener;
+	}
 
-        $this->entity = $entity;
+	public function setOpenListener(?Closure $openListener) : self{
+		if($openListener !== null){
+			Utils::validateCallableSignature(function(Player $player){ }, $openListener);
+		}
+		$this->openListener = $openListener;
 
-        $propertyManager = $entity->getNetworkProperties();
-        $propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
-        $propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-        $propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, json_encode($this->buttons));
-    }
+		return $this;
+	}
 
-    public function handleResponse(Player $player, $response): void {
-        if($response === null) {
-            $this->executeCloseListener($player);
-        } elseif(is_int($response) and array_key_exists($response, $this->buttons)) {
-            $this->buttons[$response]->executeSubmitListener($player);
-        } else {
-            throw new FormValidationException("Couldn't validate DialogForm with response $response");
-        }
-    }
+	public function executeOpenListener(Player $player) : void{
+		if($this->openListener !== null){
+			($this->openListener)($player);
+		}
+	}
 
-    protected function onCreation(): void {}
+	public function executeButtonSubmitListener(Player $player, int $button) : void{
+		if(array_key_exists($button, $this->buttons)){
+			$this->buttons[$button]->executeSubmitListener($player);
+			//close form after submit otherwise the player is stuck in the form
+			$this->close($player);
+		}else{
+			throw new FormValidationException("Couldn't validate DialogForm with response $button: button doesn't exist.");
+		}
+	}
 
+	/** @return $this */
+	public function pairWithEntity(Entity $entity) : self{
+		if($entity instanceof Player){
+			throw new InvalidArgumentException("NpcForms can't be paired with players.");
+		}
+
+		$this->entity?->getNetworkProperties()->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 0);
+
+		if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null){
+			DialogFormStore::unregisterForm($otherForm);
+		}
+
+		$this->entity = $entity;
+
+		$propertyManager = $entity->getNetworkProperties();
+		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
+		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
+		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());//todo libMarshal
+
+		return $this;
+	}
+
+	protected function onCreation() : void{ }
+
+	public function open(Player $player) : void{
+		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+		$player->getNetworkSession()->sendDataPacket($pk);
+	}
+
+	public function close(Player $player) : void{
+		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+		$player->getNetworkSession()->sendDataPacket($pk);
+	}
 }
