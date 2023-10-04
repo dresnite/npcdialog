@@ -2,7 +2,7 @@
 
 ### Download
 
-The compiled phar is available [on poggit](https://poggit.pmmp.io/ci/GiantQuartz/NpcDialog/NpcDialog)
+The compiled phar is available [on poggit](https://poggit.pmmp.io/ci/dresnite/NpcDialog/NpcDialog)
 
 ### How to use
 
