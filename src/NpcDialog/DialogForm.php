@@ -124,10 +124,6 @@ class DialogForm{
 
 	/** @return $this */
 	public function pairWithEntity(Entity $entity) : self{
-		if($entity instanceof Player){
-			throw new InvalidArgumentException("NpcForms can't be paired with players.");//TODO validate the truth of this since they are now server-controlled
-		}
-
 		$this->entity?->getNetworkProperties()->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 0);
 
 		if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null){
@@ -139,7 +135,7 @@ class DialogForm{
 		$propertyManager = $entity->getNetworkProperties();
 		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
 		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());//todo libMarshal
+		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());
 
 		return $this;
 	}
