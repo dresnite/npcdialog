@@ -142,8 +142,8 @@ class DialogForm{
 
 	protected function onCreation() : void{ }
 
-	public function open(Player $player, ?int $eid = null, ?string $nametag = "") : void{
-		$pk = NpcDialoguePacket::create($eid??$this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), $this->getId(), $nametag??$this->entity->getNameTag(), $this->getActions());
+	public function open(Player $player, ?int $eid = null, ?string $nametag = null) : void{
+		$pk = NpcDialoguePacket::create($eid ?? $this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), $this->getId(), $nametag ?? $this->entity->getNameTag(), $this->getActions());
 		$player->getNetworkSession()->sendDataPacket($pk);
 	}
 
