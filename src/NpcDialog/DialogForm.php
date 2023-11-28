@@ -109,11 +109,14 @@ class DialogForm{
 		}
 	}
 
-	public function executeButtonSubmitListener(Player $player, int $button) : void{
+	public function executeButtonSubmitListener(Player $player, int $button, bool $close = true) : void{
 		if(array_key_exists($button, $this->buttons)){
 			$this->buttons[$button]->executeSubmitListener($player);
-			//close form after submit otherwise the player is stuck in the form
-			$this->close($player);
+			//It's possible to resend the form with the same id and change it's properties, i.e. the text
+			if($close) {
+				//close form after submit otherwise the player is stuck in the form
+				$this->close($player);
+			}
 		}else{
 			throw new FormValidationException("Couldn't validate DialogForm with response $button: button doesn't exist.");
 		}
@@ -121,10 +124,6 @@ class DialogForm{
 
 	/** @return $this */
 	public function pairWithEntity(Entity $entity) : self{
-		if($entity instanceof Player){
-			throw new InvalidArgumentException("NpcForms can't be paired with players.");
-		}
-
 		$this->entity?->getNetworkProperties()->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 0);
 
 		if(($otherForm = DialogFormStore::getFormByEntity($entity)) !== null){
@@ -136,20 +135,20 @@ class DialogForm{
 		$propertyManager = $entity->getNetworkProperties();
 		$propertyManager->setByte(EntityMetadataProperties::HAS_NPC_COMPONENT, 1);
 		$propertyManager->setString(EntityMetadataProperties::INTERACTIVE_TAG, $this->dialogText);
-		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());//todo libMarshal
+		$propertyManager->setString(EntityMetadataProperties::NPC_ACTIONS, $this->getActions());
 
 		return $this;
 	}
 
 	protected function onCreation() : void{ }
 
-	public function open(Player $player) : void{
-		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+	public function open(Player $player, ?int $eid = null, ?string $nametag = null) : void{
+		$pk = NpcDialoguePacket::create($eid ?? $this->entity->getId(), NpcDialoguePacket::ACTION_OPEN, $this->getDialogText(), $this->getId(), $nametag ?? $this->entity->getNameTag(), $this->getActions());
 		$player->getNetworkSession()->sendDataPacket($pk);
 	}
 
 	public function close(Player $player) : void{
-		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, $this->getDialogText(), "default", $this->entity->getNameTag(), $this->getActions());
+		$pk = NpcDialoguePacket::create($this->entity->getId(), NpcDialoguePacket::ACTION_CLOSE, $this->getDialogText(), $this->getId(), $this->entity->getNameTag(), $this->getActions());
 		$player->getNetworkSession()->sendDataPacket($pk);
 	}
 }
